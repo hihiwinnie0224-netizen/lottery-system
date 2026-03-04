@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ 專業抽獎系統 (名單唯一制) ✨</title>
+    <style>
+        :root { --primary: #9d85e1; --active-bg: #f3f0ff; --win-color: #ff6b6b; }
+        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        body { background: #f8f7ff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+
+        .header-card { 
+            width: 100%; max-width: 500px; background: white; 
+            border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(157, 133, 225, 0.1);
+            margin-bottom: 15px; position: sticky; top: 10px; z-index: 100; border: 1px solid #eee;
+        }
+        .prize-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .prize-item { 
+            border: 2px solid #f0f0f0; padding: 10px; border-radius: 12px; 
+            text-align: center; cursor: pointer; position: relative; transition: 0.3s;
+        }
+        .prize-item.selected { border-color: var(--primary); background: var(--active-bg); transform: scale(1.02); }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        
+        .btn-draw { 
+            width: 100%; padding: 14px; border: none; border-radius: 50px; 
+            background: linear-gradient(135deg, var(--primary), #b19ef3); 
+            color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(157, 133, 225, 0.3);
+        }
+        .btn-draw:disabled { background: #ddd; box-shadow: none; cursor: not-allowed; }
+
+        /* 名單網格 */
+        .grid-container {
+            width: 100%; max-width: 500px; display: grid;
+            grid-template-columns: repeat(3, 1fr); gap: 6px; padding-bottom: 50px;
+        }
+        .name-card {
+            background: white; border: 1px solid #eee; border-radius: 10px;
+            padding: 10px 5px; font-size: 11px; text-align: center;
+            transition: 0.1s; color: #555; display: flex; flex-direction: column; align-items: center;
+        }
+        /* 閃爍跳動效果 */
+        .highlight {
+            background: var(--primary) !important; color: white !important; 
+            border-color: var(--primary) !important; transform: scale(1.1); z-index: 10;
+            box-shadow: 0 0 15px var(--primary);
+        }
+        
+        .tag { font-size: 8px; padding: 1px 4px; border-radius: 3px; margin-bottom: 3px; color: white; font-weight: bold; }
+        .tag-ig { background: #e1306c; } .tag-threads { background: #000; } .tag-line { background: #00c300; }
+
+        /* 恭喜彈窗 */
+        #win-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; align-items: center;
+            justify-content: center; z-index: 200; color: white; text-align: center; backdrop-filter: blur(5px);
+        }
+        .win-box { background: white; color: #333; padding: 30px; border-radius: 25px; width: 80%; max-width: 300px; }
+    </style>
+</head>
+<body>
+
+<div class="header-card">
+    <div style="text-align: center; font-size: 0.8rem; color: #999; margin-bottom: 8px;">剩餘參加者: <span id="count-total">0</span> 名</div>
+    <div class="prize-grid">
+        <div class="prize-item" onclick="pickPrize(this, '頭獎', 1)">
+            <span class="badge" id="b0">1</span>頭獎<p style="font-size:10px;margin:2px 0 0">雙肩包</p>
+        </div>
+        <div class="prize-item" onclick="pickPrize(this, '二獎', 2)">
+            <span class="badge" id="b1">2</span>二獎<p style="font-size:10px;margin:2px 0 0">化妝包/毯</p>
+        </div>
+        <div class="prize-item" onclick="pickPrize(this, '三獎', 2)">
+            <span class="badge" id="b2">2</span>三獎<p style="font-size:10px;margin:2px 0 0">鑰匙扣</p>
+        </div>
+        <div class="prize-item" onclick="pickPrize(this, '普獎', 2)">
+            <span class="badge" id="b3">2</span>普獎<p style="font-size:10px;margin:2px 0 0">襪/筆筒</p>
+        </div>
+    </div>
+    <button class="btn-draw" id="draw-btn" onclick="startDraw()" disabled>GO ! 開始抽獎</button>
+</div>
+
+<div class="grid-container" id="name-grid"></div>
+
+<div id="win-overlay">
+    <div class="win-box">
+        <h1 style="margin:0; font-size: 3rem;">🎉</h1>
+        <h2 id="winner-name" style="color:var(--primary); margin:10px 0;"></h2>
+        <p id="winner-prize" style="font-weight:bold; color:#666;"></p>
+        <button onclick="closeWin()" style="margin-top:20px; background:var(--primary); color:white; border:none; padding:10px 25px; border-radius:50px; font-weight:bold;">繼續抽獎</button>
+    </div>
+</div>
+
+<script>
+    // 原始名單
+    const rawData = [
+        {p:'IG', n:'wei._._.1211'}, {p:'IG', n:'cn_oo18'}, {p:'IG', n:'_yyjhc._.1003'}, {p:'IG', n:'zyh_154'}, {p:'IG', n:'happycookie9999'}, {p:'IG', n:'mrs.andy1015'}, {p:'IG', n:'eva26631595'}, {p:'IG', n:'gina1000455'}, {p:'IG', n:'toma0719'}, {p:'IG', n:'luckygirl0_0'}, {p:'IG', n:'yyui0098'}, {p:'IG', n:'onion.yu0'}, {p:'IG', n:'larryliang2025'}, {p:'IG', n:'statice.1231'}, {p:'IG', n:'yuxi_980703'},
+        {p:'THREADS', n:'wei._._.1211'}, {p:'THREADS', n:'happycookie9999'}, {p:'THREADS', n:'luckygirl0_0'}, {p:'THREADS', n:'bettyho_1211'}, {p:'THREADS', n:'j.syuan'}, {p:'THREADS', n:'renawalnut'}, {p:'THREADS', n:'ju_09.18'}, {p:'THREADS', n:'demi._.1010'}, {p:'THREADS', n:'66.uru'}, {p:'THREADS', n:'1_zznnnn'}, {p:'THREADS', n:'8i8w8w'}, {p:'THREADS', n:'good8all'}, {p:'THREADS', n:'power_happiness_care'}, {p:'THREADS', n:'coldcc99'}, {p:'THREADS', n:'koala_0925_'}, {p:'THREADS', n:'puffy_lala'}, {p:'THREADS', n:'hi_nalii'}, {p:'THREADS', n:'yuxi_980703'}, {p:'THREADS', n:'toma0719'}, {p:'THREADS', n:'_97violet'}, {p:'THREADS', n:'larryliang2025'}, {p:'THREADS', n:'yun1000455'}, {p:'THREADS', n:'love_07_23'}, {p:'THREADS', n:'mrs.andy1015'}, {p:'THREADS', n:'g9453g9453'}, {p:'THREADS', n:'been71000'}, {p:'THREADS', n:'luziyu999'}, {p:'THREADS', n:'dog00pp'}, {p:'THREADS', n:'miyami820820'}, {p:'THREADS', n:'peggy1733'}, {p:'THREADS', n:'cn_oo18'},
+        {p:'LINE', n:'Fishhhh🐟'}, {p:'LINE', n:'庭'}, {p:'LINE', n:'欣妤'}, {p:'LINE', n:'Wei'}, {p:'LINE', n:'瘦🌸'}, {p:'LINE', n:'Chen'}, {p:'LINE', n:'綺綺🎀'}, {p:'LINE', n:'林.'}, {p:'LINE', n:'Ting'}, {p:'LINE', n:'明真（Sunny）'}
+    ];
+
+    let currentList = [...rawData];
+    let selectedPrize = null;
+    let drawing = false;
+
+    function render() {
+        document.getElementById('count-total').innerText = currentList.length;
+        const grid = document.getElementById('name-grid');
+        grid.innerHTML = currentList.map((item, i) => `
+            <div class="name-card" id="card-${i}">
+                <span class="tag tag-${item.p.toLowerCase()}">${item.p}</span>
+                <span>${item.n}</span>
+            </div>
+        `).join('');
+    }
+
+    function pickPrize(el, name, count) {
+        if(drawing) return;
+        document.querySelectorAll('.prize-item').forEach(p => p.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedPrize = { name, count, el };
+        document.getElementById('draw-btn').disabled = false;
+    }
+
+    function startDraw() {
+        if(drawing || !selectedPrize || currentList.length === 0) return;
+        drawing = true;
+        document.getElementById('draw-btn').disabled = true;
+
+        let steps = 40 + Math.floor(Math.random() * 20);
+        let currentStep = 0;
+        let lastIdx = -1;
+        let speed = 60;
+
+        function run() {
+            if (lastIdx >= 0) {
+                const prev = document.getElementById(`card-${lastIdx}`);
+                if(prev) prev.classList.remove('highlight');
+            }
+
+            lastIdx = Math.floor(Math.random() * currentList.length);
+            const activeCard = document.getElementById(`card-${lastIdx}`);
+            if(activeCard) activeCard.classList.add('highlight');
+
+            currentStep++;
+            if (currentStep < steps) {
+                if (currentStep > steps - 10) speed += 50;
+                setTimeout(run, speed);
+            } else {
+                showResult(lastIdx);
+            }
+        }
+        run();
+    }
+
+    function showResult(idx) {
+        const winner = currentList[idx];
+        const winName = winner.n;
+
+        // 核心邏輯：從名單中刪除「所有平台」中叫這個名字的人
+        currentList = currentList.filter(user => user.n !== winName);
+
+        // 顯示彈窗
+        document.getElementById('winner-name').innerText = winName;
+        document.getElementById('winner-prize').innerText = `獲得：${selectedPrize.name}`;
+        document.getElementById('win-overlay').style.display = 'flex';
+
+        // 更新獎項數量
+        const badge = selectedPrize.el.querySelector('.badge');
+        let left = parseInt(badge.innerText) - 1;
+        badge.innerText = left;
+
+        if(left <= 0) {
+            selectedPrize.el.style.opacity = '0.3';
+            selectedPrize.el.onclick = null;
+            selectedPrize = null;
+        }
+    }
+
+    function closeWin() {
+        document.getElementById('win-overlay').style.display = 'none';
+        drawing = false;
+        render(); // 重新整理網格，剛才中獎的人已經不在裡面了
+    }
+
+    render();
+</script>
+
+</body>
+</html>
