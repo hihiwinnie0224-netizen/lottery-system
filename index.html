@@ -3,174 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ 專業抽獎系統 (名單唯一制) ✨</title>
+    <title>LinShop ✧ 許願清單</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        :root { --primary: #9d85e1; --active-bg: #f3f0ff; --win-color: #ff6b6b; }
-        * { box-sizing: border-box; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }
-        body { background: #f8f7ff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-
-        .header-card { 
-            width: 100%; max-width: 500px; background: white; 
-            border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(157, 133, 225, 0.1);
-            margin-bottom: 15px; position: sticky; top: 10px; z-index: 100; border: 1px solid #eee;
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #fdfdfd; color: #444; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #f0f0f0;
+            border-radius: 28px;
         }
-        .prize-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-        .prize-item { 
-            border: 2px solid #f0f0f0; padding: 10px; border-radius: 12px; 
-            text-align: center; cursor: pointer; position: relative; transition: 0.3s;
+        .tag-btn {
+            display: inline-block;
+            padding: 5px 12px;
+            margin: 3px;
+            border-radius: 8px;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            font-size: 11px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .prize-item.selected { border-color: var(--primary); background: var(--active-bg); transform: scale(1.02); }
-        .badge { position: absolute; top: -5px; right: -5px; background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold; }
-        
-        .btn-draw { 
-            width: 100%; padding: 14px; border: none; border-radius: 50px; 
-            background: linear-gradient(135deg, var(--primary), #b19ef3); 
-            color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(157, 133, 225, 0.3);
+        .tag-btn.active {
+            background: #222;
+            color: #fff;
+            border-color: #222;
         }
-        .btn-draw:disabled { background: #ddd; box-shadow: none; cursor: not-allowed; }
-
-        .grid-container {
-            width: 100%; max-width: 500px; display: grid;
-            grid-template-columns: repeat(3, 1fr); gap: 6px; padding-bottom: 50px;
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            background: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: border 0.3s;
         }
-        .name-card {
-            background: white; border: 1px solid #eee; border-radius: 10px;
-            padding: 10px 5px; font-size: 11px; text-align: center;
-            transition: 0.1s; color: #555; display: flex; flex-direction: column; align-items: center;
-        }
-        .highlight {
-            background: var(--primary) !important; color: white !important; 
-            border-color: var(--primary) !important; transform: scale(1.1); z-index: 10;
-            box-shadow: 0 0 15px var(--primary);
-        }
-        
-        .tag { font-size: 8px; padding: 1px 4px; border-radius: 3px; margin-bottom: 3px; color: white; font-weight: bold; }
-        .tag-ig { background: #e1306c; } .tag-threads { background: #000; } .tag-line { background: #00c300; }
-
-        #win-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none; align-items: center;
-            justify-content: center; z-index: 200; color: white; text-align: center; backdrop-filter: blur(5px);
-        }
-        .win-box { background: white; color: #333; padding: 30px; border-radius: 25px; width: 80%; max-width: 300px; }
+        .input-field:focus { border-color: #aaa; }
+        details summary { list-style: none; cursor: pointer; }
+        details summary::-webkit-details-marker { display: none; }
     </style>
 </head>
-<body>
+<body class="pb-20">
 
-<div class="header-card">
-    <div style="text-align: center; font-size: 0.8rem; color: #999; margin-bottom: 8px;">剩餘參加者: <span id="count-total">0</span> 名</div>
-    <div class="prize-grid">
-        <div class="prize-item" onclick="pickPrize(this, '頭獎', 1)">
-            <span class="badge" id="b0">1</span>頭獎<p style="font-size:10px;margin:2px 0 0">雙肩包</p>
-        </div>
-        <div class="prize-item" onclick="pickPrize(this, '二獎', 2)">
-            <span class="badge" id="b1">2</span>二獎<p style="font-size:10px;margin:2px 0 0">化妝包/毯</p>
-        </div>
-        <div class="prize-item" onclick="pickPrize(this, '三獎', 2)">
-            <span class="badge" id="b2">2</span>三獎<p style="font-size:10px;margin:2px 0 0">鑰匙扣</p>
-        </div>
-        <div class="prize-item" onclick="pickPrize(this, '普獎', 2)">
-            <span class="badge" id="b3">2</span>普獎<p style="font-size:10px;margin:2px 0 0">襪/筆筒</p>
-        </div>
-    </div>
-    <button class="btn-draw" id="draw-btn" onclick="startDraw()" disabled>GO ! 開始抽獎</button>
-</div>
+    <header class="pt-16 pb-10 text-center animate__animated animate__fadeIn">
+        <h1 class="text-xl font-light tracking-[0.4em] text-gray-900 uppercase">𝑳𝒊𝒏𝑺𝒉𝒐𝒑 𝑾𝒊𝒔𝒉</h1>
+        <p class="text-[10px] mt-3 text-gray-400 tracking-[0.2em]">˗ˏˋ 𝑴𝒂𝒌𝒆 𝒂 𝒘𝒊𝒔𝒉 𝒆𝒗𝒆𝒓𝒚𝒅𝒂𝒚 ˎˊ˗</p>
+    </header>
 
-<div class="grid-container" id="name-grid"></div>
+    <main class="max-w-md mx-auto px-6">
+        
+        <section class="mb-8 space-y-3">
+            <h2 class="text-[10px] font-bold text-gray-400 mb-4 tracking-widest uppercase ml-1">⊹ 𝑪𝒂𝒕𝒆𝒈𝒐𝒓𝒚 ⊹</h2>
+            
+            <details class="glass-card p-4 shadow-sm overflow-hidden">
+                <summary class="flex justify-between items-center text-xs font-medium">
+                    <span>服飾專區 ⋆ 𝑲𝒊𝒅𝒔 / 𝑾𝒐𝒎𝒆𝒏 / 𝑴𝒆𝒏</span>
+                    <span class="text-[10px] text-gray-300">▼</span>
+                </summary>
+                <div class="pt-4 flex flex-wrap">
+                    <span class="tag-btn" onclick="toggleTag(this)">女童裝</span><span class="tag-btn" onclick="toggleTag(this)">男童裝</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">女套裝</span><span class="tag-btn" onclick="toggleTag(this)">女睡衣</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">男套裝</span><span class="tag-btn" onclick="toggleTag(this)">男睡衣</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">內衣褲</span><span class="tag-btn" onclick="toggleTag(this)">馬甲/罩衫</span>
+                </div>
+            </details>
 
-<div id="win-overlay">
-    <div class="win-box">
-        <h1 style="margin:0; font-size: 3rem;">🎉</h1>
-        <h2 id="winner-name" style="color:var(--primary); margin:10px 0;"></h2>
-        <p id="winner-prize" style="font-weight:bold; color:#666;"></p>
-        <button onclick="closeWin()" style="margin-top:20px; background:var(--primary); color:white; border:none; padding:10px 25px; border-radius:50px; font-weight:bold; cursor:pointer;">繼續抽獎</button>
-    </div>
-</div>
+            <details class="glass-card p-4 shadow-sm overflow-hidden">
+                <summary class="flex justify-between items-center text-xs font-medium">
+                    <span>人氣角色 ⋆ 𝑪𝒉𝒂𝒓𝒂𝒄𝒕𝒆𝒓𝒔</span>
+                    <span class="text-[10px] text-gray-300">▼</span>
+                </summary>
+                <div class="pt-4 flex flex-wrap">
+                    <span class="tag-btn" onclick="toggleTag(this)">三麗鷗</span><span class="tag-btn" onclick="toggleTag(this)">chiikawa</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">蠟筆小新</span><span class="tag-btn" onclick="toggleTag(this)">迪士尼</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">卡皮巴拉</span><span class="tag-btn" onclick="toggleTag(this)">星之卡比</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">盲盒/公仔</span><span class="tag-btn" onclick="toggleTag(this)">娃娃吊飾</span>
+                </div>
+            </details>
 
-<script>
-    const rawData = [
-        {p:'IG', n:'wei._._.1211'}, {p:'IG', n:'cn_oo18'}, {p:'IG', n:'_yyjhc._.1003'}, {p:'IG', n:'zyh_154'}, {p:'IG', n:'happycookie9999'}, {p:'IG', n:'mrs.andy1015'}, {p:'IG', n:'eva26631595'}, {p:'IG', n:'gina1000455'}, {p:'IG', n:'toma0719'}, {p:'IG', n:'luckygirl0_0'}, {p:'IG', n:'yyui0098'}, {p:'IG', n:'onion.yu0'}, {p:'IG', n:'larryliang2025'}, {p:'IG', n:'statice.1231'}, {p:'IG', n:'yuxi_980703'},
-        {p:'THREADS', n:'wei._._.1211'}, {p:'THREADS', n:'happycookie9999'}, {p:'THREADS', n:'luckygirl0_0'}, {p:'THREADS', n:'bettyho_1211'}, {p:'THREADS', n:'j.syuan'}, {p:'THREADS', n:'renawalnut'}, {p:'THREADS', n:'ju_09.18'}, {p:'THREADS', n:'demi._.1010'}, {p:'THREADS', n:'66.uru'}, {p:'THREADS', n:'1_zznnnn'}, {p:'THREADS', n:'8i8w8w'}, {p:'THREADS', n:'good8all'}, {p:'THREADS', n:'power_happiness_care'}, {p:'THREADS', n:'coldcc99'}, {p:'THREADS', n:'koala_0925_'}, {p:'THREADS', n:'puffy_lala'}, {p:'THREADS', n:'hi_nalii'}, {p:'THREADS', n:'yuxi_980703'}, {p:'THREADS', n:'toma0719'}, {p:'THREADS', n:'_97violet'}, {p:'THREADS', n:'larryliang2025'}, {p:'THREADS', n:'yun1000455'}, {p:'THREADS', n:'love_07_23'}, {p:'THREADS', n:'mrs.andy1015'}, {p:'THREADS', n:'g9453g9453'}, {p:'THREADS', n:'been71000'}, {p:'THREADS', n:'luziyu999'}, {p:'THREADS', n:'dog00pp'}, {p:'THREADS', n:'miyami820820'}, {p:'THREADS', n:'peggy1733'}, {p:'THREADS', n:'cn_oo18'},
-        {p:'LINE', n:'Fishhhh🐟'}, {p:'LINE', n:'庭'}, {p:'LINE', n:'欣妤'}, {p:'LINE', n:'Wei'}, {p:'LINE', n:'瘦🌸'}, {p:'LINE', n:'Chen'}, {p:'LINE', n:'綺綺🎀'}, {p:'LINE', n:'林.'}, {p:'LINE', n:'Ting'}, {p:'LINE', n:'明真（Sunny）'}
-    ];
+            <details class="glass-card p-4 shadow-sm overflow-hidden">
+                <summary class="flex justify-between items-center text-xs font-medium">
+                    <span>配件配件 ⋆ 𝑨𝒄𝒄𝒆𝒔𝒔𝒐𝒓𝒊𝒆𝒔</span>
+                    <span class="text-[10px] text-gray-300">▼</span>
+                </summary>
+                <div class="pt-4 flex flex-wrap">
+                    <span class="tag-btn" onclick="toggleTag(this)">蘋果殼/磁吸殼</span><span class="tag-btn" onclick="toggleTag(this)">行充/線材</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">包包/錢包</span><span class="tag-btn" onclick="toggleTag(this)">穿戴甲</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">鯊魚夾/髮飾</span><span class="tag-btn" onclick="toggleTag(this)">項鍊/耳環</span>
+                </div>
+            </details>
 
-    let currentList = [...rawData];
-    let selectedPrize = null;
-    let drawing = false;
+            <details class="glass-card p-4 shadow-sm overflow-hidden">
+                <summary class="flex justify-between items-center text-xs font-medium">
+                    <span>生活美學 ⋆ 𝑫𝒂𝒊𝒍𝒚 𝑳𝒊𝒇𝒆</span>
+                    <span class="text-[10px] text-gray-300">▼</span>
+                </summary>
+                <div class="pt-4 flex flex-wrap">
+                    <span class="tag-btn" onclick="toggleTag(this)">文具/辦公</span><span class="tag-btn" onclick="toggleTag(this)">杯子/水壺</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">收納/鏡子</span><span class="tag-btn" onclick="toggleTag(this)">香氛/噴霧</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">小風扇/家電</span><span class="tag-btn" onclick="toggleTag(this)">寵物用品</span>
+                </div>
+            </details>
 
-    function render() {
-        document.getElementById('count-total').innerText = currentList.length;
-        const grid = document.getElementById('name-grid');
-        grid.innerHTML = currentList.map((item, i) => `
-            <div class="name-card" id="card-${i}">
-                <span class="tag tag-${item.p.toLowerCase()}">${item.p}</span>
-                <span>${item.n}</span>
-            </div>
-        `).join('');
-    }
+            <details class="glass-card p-4 shadow-sm overflow-hidden">
+                <summary class="flex justify-between items-center text-xs font-medium">
+                    <span>甜點零食 ⋆ 𝑭𝒐𝒐𝒅𝒔</span>
+                    <span class="text-[10px] text-gray-300">▼</span>
+                </summary>
+                <div class="pt-4 flex flex-wrap">
+                    <span class="tag-btn" onclick="toggleTag(this)">韓國零食</span><span class="tag-btn" onclick="toggleTag(this)">螺絲粉</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">魔芋/辣條</span><span class="tag-btn" onclick="toggleTag(this)">手工零食</span>
+                    <span class="tag-btn" onclick="toggleTag(this)">奶昔/好喝的</span>
+                </div>
+            </details>
+        </section>
 
-    function pickPrize(el, name, count) {
-        if(drawing) return;
-        document.querySelectorAll('.prize-item').forEach(p => p.classList.remove('selected'));
-        el.classList.add('selected');
-        selectedPrize = { name, count, el };
-        document.getElementById('draw-btn').disabled = false;
-    }
+        <section class="glass-card p-8 shadow-xl animate__animated animate__fadeInUp">
+            <form id="wish-form" class="space-y-6">
+                <input type="hidden" id="category-input" name="category" value="">
 
-    function startDraw() {
-        if(drawing || !selectedPrize || currentList.length === 0) return;
-        drawing = true;
-        document.getElementById('draw-btn').disabled = true;
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">𝑰𝒕𝒆𝒎 𝑵𝒂𝒎𝒆</label>
+                    <input type="text" name="item" required placeholder="想許願什麼商品？" class="input-field">
+                </div>
 
-        let steps = 40 + Math.floor(Math.random() * 20);
-        let currentStep = 0;
-        let lastIdx = -1;
-        let speed = 60;
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">𝑰𝒎𝒂𝒈𝒆 𝑳𝒊𝒏𝒌</label>
+                    <input type="text" name="image" placeholder="貼上 IG / 小紅書 / 圖片網址" class="input-field">
+                </div>
 
-        function run() {
-            if (lastIdx >= 0) {
-                const prev = document.getElementById(`card-${lastIdx}`);
-                if(prev) prev.classList.remove('highlight');
-            }
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">𝑴𝒚 𝑷𝒓𝒊𝒄𝒆</label>
+                        <input type="text" name="wish_price" placeholder="理想價" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">𝑶𝒕𝒉𝒆𝒓𝒔</label>
+                        <input type="text" name="market_price" placeholder="別家售價" class="input-field">
+                    </div>
+                </div>
 
-            lastIdx = Math.floor(Math.random() * currentList.length);
-            const activeCard = document.getElementById(`card-${lastIdx}`);
-            if(activeCard) activeCard.classList.add('highlight');
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">𝑴𝒆𝒎𝒐</label>
+                    <textarea name="memo" rows="2" placeholder="備註顏色、規格或其他..." class="input-field"></textarea>
+                </div>
 
-            currentStep++;
-            if (currentStep < steps) {
-                if (currentStep > steps - 10) speed += 50;
-                setTimeout(run, speed);
+                <button type="submit" id="submit-btn" class="w-full bg-gray-900 text-white text-[11px] font-bold py-5 rounded-2xl shadow-lg tracking-[0.4em] active:scale-95 transition">
+                    𝑺𝑬𝑵𝑫 𝑾𝑰𝑺𝑯 ⋆
+                </button>
+                
+                <p id="status" class="text-center text-[10px] font-medium hidden"></p>
+            </form>
+        </section>
+
+    </main>
+
+    <script>
+        let selectedTags = [];
+        function toggleTag(el) {
+            const tag = el.innerText;
+            if (el.classList.contains('active')) {
+                el.classList.remove('active');
+                selectedTags = selectedTags.filter(t => t !== tag);
             } else {
-                showResult(lastIdx);
+                el.classList.add('active');
+                selectedTags.push(tag);
             }
+            document.getElementById('category-input').value = selectedTags.join(', ');
         }
-        run();
-    }
 
-    function showResult(idx) {
-        const winner = currentList[idx];
-        const winName = winner.n;
-        currentList = currentList.filter(user => user.n !== winName);
-        document.getElementById('winner-name').innerText = winName;
-        document.getElementById('winner-prize').innerText = `獲得：${selectedPrize.name}`;
-        document.getElementById('win-overlay').style.display = 'flex';
-        const badge = selectedPrize.el.querySelector('.badge');
-        let left = parseInt(badge.innerText) - 1;
-        badge.innerText = left;
-        if(left <= 0) {
-            selectedPrize.el.style.opacity = '0.3';
-            selectedPrize.el.onclick = null;
-            selectedPrize = null;
-        }
-    }
+        const form = document.getElementById("wish-form");
+        const btn = document.getElementById("submit-btn");
+        const status = document.getElementById("status");
 
-    function closeWin() {
-        document.getElementById('win-overlay').style.display = 'none';
-        drawing = false;
-        render();
-    }
-    render();
-</script>
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            btn.disabled = true;
+            btn.innerText = "✦ 𝑷𝑹𝑶𝑪𝑬𝑺𝑺𝑰𝑵𝑮...";
+            
+            try {
+                const response = await fetch("https://formspree.io/f/2953544112944447002", {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (response.ok) {
+                    status.innerText = "⋆ 許願已送達 𝑳𝒊𝒏𝑺𝒉𝒐𝒑 ⋆";
+                    status.className = "text-center text-[10px] text-green-600 mt-4 animate__animated animate__fadeIn";
+                    status.classList.remove("hidden");
+                    form.reset();
+                    document.querySelectorAll('.tag-btn').forEach(t => t.classList.remove('active'));
+                    btn.innerText = "𝑺𝑬𝑵𝑫 𝑨𝑮𝑨𝑰𝑵";
+                } else { throw new Error(); }
+            } catch (err) {
+                status.innerText = "⋆ 傳送出錯囉 ⋆";
+                status.className = "text-center text-[10px] text-red-400 mt-4";
+                status.classList.remove("hidden");
+                btn.innerText = "𝑹𝑬𝑻𝑹𝒀";
+            } finally {
+                btn.disabled = false;
+            }
+        };
+    </script>
+
 </body>
 </html>
