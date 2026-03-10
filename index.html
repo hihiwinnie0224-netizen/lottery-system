@@ -8,23 +8,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #fafafa; color: #333; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #fafafa; color: #333; -webkit-tap-highlight-color: transparent; }
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid #eee; border-radius: 24px; }
-        .tag-btn { display: inline-block; padding: 6px 14px; margin: 4px; border-radius: 12px; background: #f3f4f6; font-size: 11px; color: #666; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
-        .tag-btn.active { background: #111; color: #fff; border-color: #111; transform: scale(0.95); }
-        .input-field { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid #eee; font-size: 13px; outline: none; transition: 0.3s; background: #fff; }
-        .input-field:focus { border-color: #ccc; box-shadow: 0 0 0 2px rgba(0,0,0,0.02); }
+        .tag-btn { display: inline-block; padding: 6px 14px; margin: 4px; border-radius: 12px; background: #f3f4f6; font-size: 11px; color: #666; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .tag-btn.active { background: #111; color: #fff; border-color: #111; transform: translateY(-1px); }
         details summary { list-style: none; cursor: pointer; outline: none; }
         .cat-title { font-size: 12px; font-weight: 500; letter-spacing: 0.1em; color: #555; }
-        /* 隱藏捲軸但保留功能 */
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
 <body class="pb-24">
 
     <header class="pt-16 pb-10 text-center animate__animated animate__fadeIn">
         <h1 class="text-xl font-light tracking-[0.4em] text-gray-900 uppercase">𝑳𝒊𝒏𝑺𝒉𝒐𝒑 𝑾𝒊𝒔𝒉</h1>
-        <p class="text-[10px] mt-4 text-gray-400 tracking-[0.2em]">˗ˏˋ 隨心許願 ‧ 不知道填「無」即可 ˎˊ˗</p>
+        <p class="text-[10px] mt-4 text-gray-400 tracking-[0.2em]">˗ˏˋ 點擊類別標籤即可許願 ˎˊ˗</p>
     </header>
 
     <main class="max-w-md mx-auto px-6">
@@ -37,33 +33,10 @@
             <form id="wish-form" class="space-y-6">
                 <input type="hidden" id="category-input" value="無">
                 
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑰𝒕𝒆𝒎 𝑵𝒂𝒎𝒆</label>
-                    <input type="text" id="item-input" placeholder="想找什麼商品？" class="input-field" required>
+                <div class="text-center py-2">
+                    <p class="text-[10px] text-gray-400 mb-6">選好想要許願的項目了嗎？</p>
+                    <button type="submit" id="submit-btn" class="w-full bg-gray-900 text-white text-[11px] font-bold py-5 rounded-2xl shadow-lg tracking-[0.4em] active:scale-95 transition">𝑺𝑬𝑵𝑫 𝑾𝑰𝑺𝑯 ⋆</button>
                 </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑰𝒎𝒂𝒈𝒆 𝑳𝒊𝒏𝒌</label>
-                    <input type="text" id="image-input" placeholder="圖片連結 (選填)" class="input-field">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑾𝒊𝒔𝒉 𝑷𝒓𝒊𝒄𝒆</label>
-                        <input type="text" id="wish-price-input" placeholder="理想價" class="input-field">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑴𝒂𝒓𝒌𝒆𝒕 𝑷𝒓𝒊𝒄𝒆</label>
-                        <input type="text" id="market-price-input" placeholder="參考價" class="input-field">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑴𝒆𝒎𝒐</label>
-                    <textarea id="memo-input" rows="2" placeholder="細節備註..." class="input-field"></textarea>
-                </div>
-
-                <button type="submit" id="submit-btn" class="w-full bg-gray-900 text-white text-[11px] font-bold py-5 rounded-2xl shadow-lg tracking-[0.4em] active:scale-95 transition">𝑺𝑬𝑵𝑫 𝑾𝑰𝑺𝑯 ⋆</button>
                 <p id="status" class="text-center text-[10px] mt-6 hidden font-medium"></p>
             </form>
         </section>
@@ -79,7 +52,12 @@
             "女生專區 𝑭𝒆𝒎𝒂𝒍𝒆": ["女套裝/外套", "女睡衣", "女生T-shirt", "抹胸/吊帶", "女襯衫", "女長短褲", "長裙/連衣裙", "內衣褲"],
             "男生專區 𝑴𝒂𝒍𝒆": ["男套裝/外套", "男睡衣", "男生T-shirt", "男馬甲/襯衫", "男長短褲"],
             "鞋襪｜雨具 𝑺𝒉𝒐𝒆𝒔": ["長襪/短襪", "拖鞋/棉鞋", "短靴/長靴", "皮鞋/高跟鞋", "休閒鞋/洞洞鞋", "雨衣/雨傘"],
-            "包類｜配件 𝑨𝒄𝒄𝒆𝒔𝒔𝒐𝒓𝒊𝒆𝒔": ["包包/痛包", "錢包/皮夾", "眼鏡/帽子", "皮帶/鞋扣", "髮飾/抓夾", "手項鍊/耳環", "戒指/耳針", "手工穿戴甲"],
+            "包類｜配件 𝑨𝒄𝒄𝒆𝒔𝒔𝒐𝒓𝒊𝒆𝒔": ["包包/痛包", "錢包/皮夾", "眼鏡/帽子", "髮飾/抓夾", "手項鍊/耳環", "戒指/耳針", "手工穿戴甲"],
+            "居家｜廚房 𝑯𝒐𝒎𝒆": ["生活小物", "杯子/水壺", "碗盤/餐具", "收納/紙袋", "鏡子/梳子", "地墊/垃圾桶", "手機支架", "椅子/衣架"],
+            "電器｜美妝 𝑩𝒆𝒂𝒖𝒕𝒚": ["吹風機/捲髮棒", "電動牙刷", "香水/香片", "護手霜", "防曬霜", "卸妝油", "花知曉/彩棠", "唇釉/唇泥", "眼影盤", "遮瑕/眼線筆"],
+            "吊飾｜娃娃｜寵物": ["卡套/吧唧包", "吊飾/掛繩", "娃娃/抱枕", "盲盒/公仔", "寵物衣/配件"],
+            "裝飾｜佈置 𝑫𝒆𝒄𝒐𝒓": ["玩具/捏捏樂", "立牌/蠟燭", "拼圖/布條", "小夜燈/存錢筒"],
+            "DIY｜包材 𝑴𝒂𝒕𝒆𝒓𝒊𝒂𝒍": ["數字油畫/鑽石貼", "扭扭棒/毛線", "貼紙/紙膠帶", "客製化/代印", "賣家包材/飛機盒"],
             "食品專區 𝑭𝒐𝒐𝒅": ["各類糖果/餅乾", "螺絲粉專區", "魔芋/辣條系列", "好喝奶昔/飲品"]
         };
 
@@ -106,27 +84,14 @@
             const btn = document.getElementById("submit-btn");
             const status = document.getElementById("status");
             
-            // 提交網址與更新後的 6 組正確 ID
             const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScxnQFlk684wdqOqabNrkOtlN5N4_DRHK_LiXC4mqugKFv9BA/formResponse";
-            const entryIDs = {
-                category: "entry.2018690279", 
-                item: "entry.1706240292",
-                image: "entry.1691954316",
-                wish_price: "entry.1565578772",
-                market_price: "entry.602534063",
-                memo: "entry.1352729938"
-            };
+            const categoryID = "entry.2018690279"; // 只使用類別 ID
 
             btn.disabled = true;
             btn.innerText = "✦ 𝑷𝑹𝑶𝑪𝑬𝑺𝑺𝑰𝑵𝑮...";
 
             const formData = new URLSearchParams();
-            formData.append(entryIDs.category, document.getElementById('category-input').value);
-            formData.append(entryIDs.item, document.getElementById('item-input').value || "無");
-            formData.append(entryIDs.image, document.getElementById('image-input').value || "無");
-            formData.append(entryIDs.wish_price, document.getElementById('wish-price-input').value || "無");
-            formData.append(entryIDs.market_price, document.getElementById('market-price-input').value || "無");
-            formData.append(entryIDs.memo, document.getElementById('memo-input').value || "無");
+            formData.append(categoryID, document.getElementById('category-input').value);
 
             try {
                 await fetch(GOOGLE_FORM_URL, {
@@ -137,11 +102,13 @@
                 });
 
                 status.innerText = "⋆ 許願成功，𝑳𝒊𝒏𝑺𝒉𝒐𝒑 已收到 ⋆";
-                status.className = "text-center text-[10px] text-green-600 mt-6 animate__animated animate__fadeIn";
+                status.className = "text-center text-[10px] text-green-600 mt-6";
                 status.classList.remove("hidden");
-                form.reset();
+                
+                // 重置選擇
                 document.querySelectorAll('.tag-btn').forEach(t => t.classList.remove('active'));
                 selectedTags = [];
+                document.getElementById('category-input').value = "無";
             } catch (err) {
                 status.innerText = "⋆ 傳送失敗，請稍後再試 ⋆";
                 status.className = "text-center text-[10px] text-red-500 mt-6";
