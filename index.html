@@ -8,14 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #fafafa; color: #333; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #fafafa; color: #333; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid #eee; border-radius: 24px; }
-        .tag-btn { display: inline-block; padding: 6px 12px; margin: 3px; border-radius: 10px; background: #f3f4f6; font-size: 11px; color: #666; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
-        .tag-btn.active { background: #111; color: #fff; border-color: #111; }
+        .tag-btn { display: inline-block; padding: 6px 14px; margin: 4px; border-radius: 12px; background: #f3f4f6; font-size: 11px; color: #666; cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
+        .tag-btn.active { background: #111; color: #fff; border-color: #111; transform: scale(0.95); }
         .input-field { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid #eee; font-size: 13px; outline: none; transition: 0.3s; background: #fff; }
         .input-field:focus { border-color: #ccc; box-shadow: 0 0 0 2px rgba(0,0,0,0.02); }
         details summary { list-style: none; cursor: pointer; outline: none; }
         .cat-title { font-size: 12px; font-weight: 500; letter-spacing: 0.1em; color: #555; }
+        /* 隱藏捲軸但保留功能 */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
 <body class="pb-24">
@@ -31,29 +33,34 @@
             <div id="category-container" class="space-y-3"></div>
         </section>
 
-        <section class="glass-card p-8 shadow-xl">
+        <section class="glass-card p-8 shadow-xl animate__animated animate__fadeInUp">
             <form id="wish-form" class="space-y-6">
-                <input type="hidden" id="category-input" name="category" value="無">
+                <input type="hidden" id="category-input" value="無">
                 
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑰𝒕𝒆𝒎 𝑵𝒂𝒎𝒆</label>
-                    <input type="text" name="item" id="item-input" placeholder="想找什麼商品？" class="input-field">
+                    <input type="text" id="item-input" placeholder="想找什麼商品？" class="input-field" required>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑰𝒎𝒂𝒈𝒆 / 𝑷𝒓𝒊𝒄𝒆</label>
-                    <div class="space-y-3">
-                        <input type="text" name="image" placeholder="圖片連結 (不知填無)" class="input-field">
-                        <div class="flex gap-3">
-                            <input type="text" name="wish_price" placeholder="理想價" class="input-field">
-                            <input type="text" name="market_price" placeholder="參考價" class="input-field">
-                        </div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑰𝒎𝒂𝒈𝒆 𝑳𝒊𝒏𝒌</label>
+                    <input type="text" id="image-input" placeholder="圖片連結 (選填)" class="input-field">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑾𝒊𝒔𝒉 𝑷𝒓𝒊𝒄𝒆</label>
+                        <input type="text" id="wish-price-input" placeholder="理想價" class="input-field">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑴𝒂𝒓𝒌𝒆𝒕 𝑷𝒓𝒊𝒄𝒆</label>
+                        <input type="text" id="market-price-input" placeholder="參考價" class="input-field">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">⊹ 𝑴𝒆𝒎𝒐</label>
-                    <textarea name="memo" rows="2" placeholder="備註或想說的話..." class="input-field"></textarea>
+                    <textarea id="memo-input" rows="2" placeholder="細節備註..." class="input-field"></textarea>
                 </div>
 
                 <button type="submit" id="submit-btn" class="w-full bg-gray-900 text-white text-[11px] font-bold py-5 rounded-2xl shadow-lg tracking-[0.4em] active:scale-95 transition">𝑺𝑬𝑵𝑫 𝑾𝑰𝑺𝑯 ⋆</button>
@@ -79,7 +86,7 @@
         const container = document.getElementById('category-container');
         Object.keys(categories).forEach(cat => {
             const details = document.createElement('details');
-            details.className = "glass-card p-4 shadow-sm animate__animated animate__fadeIn";
+            details.className = "glass-card p-4 shadow-sm";
             details.innerHTML = `<summary class="flex justify-between items-center cat-title"><span>˗ˏˋ ${cat} ˎˊ˗</span><span class="text-[8px] text-gray-300">▼</span></summary><div class="pt-4 flex flex-wrap">${categories[cat].map(tag => `<span class="tag-btn" onclick="toggleTag(this)">#${tag}</span>`).join('')}</div>`;
             container.appendChild(details);
         });
@@ -99,31 +106,8 @@
             const btn = document.getElementById("submit-btn");
             const status = document.getElementById("status");
             
-            // 已經為你填入正確的網址與 ID
-            const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf2qz29Rep2WLcQK4EYp8XM_lCOCVlklay3DjqyPm5zzSXEwA/formResponse";
-            
-            const entryIDs = {
-                category: "entry.1158581699", 
-                item: "entry.1706240292",
-                image: "entry.1691954316",
-                wish_price: "entry.1565578772",
-                market_price: "entry.602534063",
-                memo: "entry.1352729938"
-            };
-
-            btn.disabled = true;
-            btn.innerText = "✦ 𝑷𝑹𝑶𝑪𝑬𝑺𝑺𝑰𝑵𝑮...";
-
-const form = document.getElementById("wish-form");
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById("submit-btn");
-            const status = document.getElementById("status");
-            
-            // 你的最新表單提交網址
+            // 提交網址與更新後的 6 組正確 ID
             const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScxnQFlk684wdqOqabNrkOtlN5N4_DRHK_LiXC4mqugKFv9BA/formResponse";
-            
-            // 這是我們剛剛抓到的正確 ID 對應
             const entryIDs = {
                 category: "entry.2018690279", 
                 item: "entry.1706240292",
@@ -137,7 +121,6 @@ const form = document.getElementById("wish-form");
             btn.innerText = "✦ 𝑷𝑹𝑶𝑪𝑬𝑺𝑺𝑰𝑵𝑮...";
 
             const formData = new URLSearchParams();
-            // 確保所有欄位都對應到正確的 ID
             formData.append(entryIDs.category, document.getElementById('category-input').value);
             formData.append(entryIDs.item, document.getElementById('item-input').value || "無");
             formData.append(entryIDs.image, document.getElementById('image-input').value || "無");
@@ -146,7 +129,6 @@ const form = document.getElementById("wish-form");
             formData.append(entryIDs.memo, document.getElementById('memo-input').value || "無");
 
             try {
-                // 使用 no-cors 模式確保資料穿透 Google 的安全性檢查
                 await fetch(GOOGLE_FORM_URL, {
                     method: "POST",
                     mode: "no-cors",
@@ -155,12 +137,14 @@ const form = document.getElementById("wish-form");
                 });
 
                 status.innerText = "⋆ 許願成功，𝑳𝒊𝒏𝑺𝒉𝒐𝒑 已收到 ⋆";
-                status.className = "text-center text-[10px] text-green-600 mt-6";
+                status.className = "text-center text-[10px] text-green-600 mt-6 animate__animated animate__fadeIn";
                 status.classList.remove("hidden");
                 form.reset();
                 document.querySelectorAll('.tag-btn').forEach(t => t.classList.remove('active'));
+                selectedTags = [];
             } catch (err) {
-                status.innerText = "⋆ 傳送失敗，請聯繫管理員 ⋆";
+                status.innerText = "⋆ 傳送失敗，請稍後再試 ⋆";
+                status.className = "text-center text-[10px] text-red-500 mt-6";
                 status.classList.remove("hidden");
             } finally {
                 btn.disabled = false;
