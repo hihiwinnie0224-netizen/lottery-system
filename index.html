@@ -160,14 +160,15 @@
             e.preventDefault();
             const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf2qz29Rep2WLcQK4EYp8XM_lCOCVlklay3DjqyPm5zzSXEwA/formResponse";
             
-            const entryIDs = {
-                category: "entry.1158581699",
-                item: "entry.1706240292",
-                image: "entry.1691954316",
-                wish_price: "entry.1565578772",
-                market_price: "entry.602534063",
-                memo: "entry.1352729938"
-            };
+// 請將這段貼到 index.html 中替換舊有的 entryIDs
+const entryIDs = {
+    category: "entry.1158581699",    // ⊹ 𝑪𝒂𝒕𝒆𝒈𝒐𝒓𝒚 ⋆ 類別
+    productName: "entry.1706240292", // ⊹ 𝑷𝒓𝒐𝒅𝒖𝒄𝒕 ⋆ 商品名稱
+    imgUrl: "entry.1691954316",      // ⊹ 𝑷𝒉𝒐𝒕𝒐 ⋆ 圖片連結
+    priceIdeal: "entry.1565578772",  // ⊹ 𝑷𝒓𝒊𝒄𝒆 ⋆ 理想價
+    priceRef: "entry.602534063",     // ⊹ 𝑹𝒆𝒇𝒆𝒓𝒆𝒏𝒄𝒆 ⋆ 參考價
+    note: "entry.1352729938"         // ⊹ 𝑴𝒆𝒎𝒐 ⋆ 備註
+};
 
             const cat = document.getElementById('category-input').value;
             const item = document.getElementById('item-input').value;
