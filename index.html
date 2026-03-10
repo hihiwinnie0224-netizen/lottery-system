@@ -114,25 +114,53 @@
             btn.disabled = true;
             btn.innerText = "✦ 𝑷𝑹𝑶𝑪𝑬𝑺𝑺𝑰𝑵𝑮...";
 
+const form = document.getElementById("wish-form");
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("submit-btn");
+            const status = document.getElementById("status");
+            
+            // 你的最新表單提交網址
+            const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScxnQFlk684wdqOqabNrkOtlN5N4_DRHK_LiXC4mqugKFv9BA/formResponse";
+            
+            // 這是我們剛剛抓到的正確 ID 對應
+            const entryIDs = {
+                category: "entry.2018690279", 
+                item: "entry.1706240292",
+                image: "entry.1691954316",
+                wish_price: "entry.1565578772",
+                market_price: "entry.602534063",
+                memo: "entry.1352729938"
+            };
+
+            btn.disabled = true;
+            btn.innerText = "✦ 𝑷𝑹𝑶𝑪𝑬𝑺𝑺𝑰𝑵𝑮...";
+
             const formData = new URLSearchParams();
+            // 確保所有欄位都對應到正確的 ID
             formData.append(entryIDs.category, document.getElementById('category-input').value);
-            formData.append(entryIDs.item, form.item.value || "無");
-            formData.append(entryIDs.image, form.image.value || "無");
-            formData.append(entryIDs.wish_price, form.wish_price.value || "無");
-            formData.append(entryIDs.market_price, form.market_price.value || "無");
-            formData.append(entryIDs.memo, form.memo.value || "無");
+            formData.append(entryIDs.item, document.getElementById('item-input').value || "無");
+            formData.append(entryIDs.image, document.getElementById('image-input').value || "無");
+            formData.append(entryIDs.wish_price, document.getElementById('wish-price-input').value || "無");
+            formData.append(entryIDs.market_price, document.getElementById('market-price-input').value || "無");
+            formData.append(entryIDs.memo, document.getElementById('memo-input').value || "無");
 
             try {
-                await fetch(GOOGLE_FORM_URL, { method: "POST", mode: "no-cors", body: formData });
+                // 使用 no-cors 模式確保資料穿透 Google 的安全性檢查
+                await fetch(GOOGLE_FORM_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: formData
+                });
+
                 status.innerText = "⋆ 許願成功，𝑳𝒊𝒏𝑺𝒉𝒐𝒑 已收到 ⋆";
-                status.className = "text-center text-[10px] text-green-600 mt-6 animate__animated animate__fadeIn";
+                status.className = "text-center text-[10px] text-green-600 mt-6";
                 status.classList.remove("hidden");
                 form.reset();
                 document.querySelectorAll('.tag-btn').forEach(t => t.classList.remove('active'));
-                selectedTags = [];
             } catch (err) {
-                status.innerText = "⋆ 傳送失敗，請稍後再試 ⋆";
-                status.className = "text-center text-[10px] text-red-400 mt-6";
+                status.innerText = "⋆ 傳送失敗，請聯繫管理員 ⋆";
                 status.classList.remove("hidden");
             } finally {
                 btn.disabled = false;
